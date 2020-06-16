@@ -1,15 +1,15 @@
-const AWS = require('aws-sdk');
+import { EC2, AutoScaling } from 'aws-sdk'; 
+import { APIGatewayProxyHandler } from 'aws-lambda';
 
-export const handler = async (event: any) : Promise <any> => {
+export const handler: APIGatewayProxyHandler = async (event) => {
 
     console.log("request:", JSON.stringify(event, undefined, 2));
-
-    const autoscaling = new AWS.AutoScaling();
-    const ec2 = new AWS.EC2();
+    const autoscaling = new AutoScaling();
+    const ec2 = new EC2();
     const asgName = 'cuple-asg'
     const instanceId = "i-0c5ad0d86f612f3c6";
     let runDate = new Date().toISOString().substring(0, 19).replace(':','-').replace(':','-');
-    
+
     const ec2ImageParams = {
         Description: "An AMI for cuple-asg",
         InstanceId: instanceId,
