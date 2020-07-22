@@ -48,7 +48,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     const asgResponse = await autoscaling.describeAutoScalingGroups(asgParams).promise();
     console.log(asgResponse, undefined, 2);
 
-    //Get current load configuration
+    //Get current launch configuration
     const sourceLaunchConfig = asgResponse.AutoScalingGroups[0].LaunchConfigurationName;
     console.log('current launch config name: ' + sourceLaunchConfig);
 
