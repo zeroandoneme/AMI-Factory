@@ -1,7 +1,7 @@
 import { EC2, AutoScaling , } from 'aws-sdk'; 
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { DescribeImagesRequest, CreateImageRequest } from 'aws-sdk/clients/ec2';
-import { LaunchConfigurationNamesType, AutoScalingGroupNamesType, CreateLaunchConfigurationType, UpdateAutoScalingGroupType } from 'aws-sdk/clients/autoscaling';
+import { LaunchConfigurationNamesType, AutoScalingGroupNamesType, CreateLaunchConfigurationType, UpdateAutoScalingGroupType, BlockDeviceMappings } from 'aws-sdk/clients/autoscaling';
 
 interface apiRequestInterface {
     asgName: string,
@@ -64,14 +64,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     const ec2Response = await ec2.describeImages(ec2Params).promise();
     console.log(JSON.stringify(ec2Response, undefined, 2));
 
-    const sourceAmiSnapshot = ec2Response.Images![0].BlockDeviceMappings![0].Ebs!.SnapshotId;
-    console.log('New source AMI: ami-09a5756f493a9a9d7' + " has snapshot ID: " + sourceAmiSnapshot);
-
-    var sourceBlockDevices = lcResponse.LaunchConfigurations[0].BlockDeviceMappings;
-    console.log('Current Block Devices: ' + JSON.stringify(sourceBlockDevices));
-    sourceBlockDevices![0].Ebs!.SnapshotId = sourceAmiSnapshot
-    console.log('New Block Devices: ' + JSON.stringify(sourceBlockDevices));
-
     const clcParams: CreateLaunchConfigurationType = {
         //InstanceId: sourceInstanceId,
         IamInstanceProfile: lcResponse.LaunchConfigurations[0].IamInstanceProfile, 
@@ -82,7 +74,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         KeyName: lcResponse.LaunchConfigurations[0].KeyName,
         EbsOptimized: lcResponse.LaunchConfigurations[0].EbsOptimized,
         AssociatePublicIpAddress : lcResponse.LaunchConfigurations[0].AssociatePublicIpAddress,
-        BlockDeviceMappings: sourceBlockDevices
+        BlockDeviceMappings: ec2Response.Images![0].BlockDeviceMappings as BlockDeviceMappings
     };
 
     const clcResponse = await autoscaling.createLaunchConfiguration(clcParams).promise();
