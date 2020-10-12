@@ -1,0 +1,13 @@
+version: 0.1
+phases:
+  install:
+    commands:
+      - npm install -g typescript
+      - npm install
+      - npm run build
+artifacts:
+  type: zip
+  files:
+    - '**/*.json'
+  base-directory: output
+  discard-paths: yes
